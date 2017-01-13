@@ -8,3 +8,28 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Executive Summary
+
+## Exploratory Analysis
+
+```{r}
+library(ggplot2)
+head(mtcars)
+dim(mtcars)
+ggplot(mtcars, aes(factor(am), mpg)) + geom_violin()
+```
+
+## Model Selection
+
+### Linear, Binomial, or Poisson?
+
+### Which other factors to include
+
+#### Include some residual plots
+
+## Automatic vs. Manual
+
+### Hypothesis Testing
+
+### Quantifying the Uncertainty
