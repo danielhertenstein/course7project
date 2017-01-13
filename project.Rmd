@@ -2,7 +2,9 @@
 title: "Analysis for Motor Trend"
 author: "Daniel Hertenstein"
 date: "January 13, 2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -14,11 +16,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Exploratory Analysis
 
 ```{r}
-library(ggplot2)
 head(mtcars)
 dim(mtcars)
-ggplot(mtcars, aes(factor(am), mpg)) + geom_violin()
 ```
+
+The mtcars data set contains observations of 11 variables for 32 cars extracted from the 1974 Motor Trend US Magazine. The variables are, in order as seen by the first 5 rows: miles per gallon (mpg), number of cylinders, engine displacement, gross horsepower, rear axle ratio, weight (in tons (1000 lbs)), 1/4 mile time, V/S, transmission type, number of forward gears, and number of carburetors. Our analysis explores mpg for cars with manual vs. automatic transmissions. To get an idea of the distribution of mpg for each category, we start with a simple violin plot.
+
+```{r}
+library(ggplot2)
+ggplot(mtcars, aes(factor(am), mpg)) + geom_violin() + labs(x="Automatic (0) vs. Manual (1)", title="Naively, Manual Looks Better")
+```
+
+Based on this plot, we can make a naive and weak claim that cars with manual transmissions have higher mpgs than those with automatic transmission. However, there may be other reasons for the difference in this plot due to differences in the other variables in the data set such as weight or number of cylinders. To address this, we will fit a linear model relating mpg to the most important (to the best of our abilities) factors.
 
 ## Model Selection
 
@@ -33,3 +42,5 @@ ggplot(mtcars, aes(factor(am), mpg)) + geom_violin()
 ### Hypothesis Testing
 
 ### Quantifying the Uncertainty
+
+## Conclusions and Assumptions?
