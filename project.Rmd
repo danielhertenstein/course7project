@@ -1,0 +1,10 @@
+---
+title: "Analysis for Motor Trend"
+author: "Daniel Hertenstein"
+date: "January 13, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
