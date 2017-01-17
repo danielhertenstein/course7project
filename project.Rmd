@@ -31,9 +31,29 @@ Based on this plot, we can make a naive and weak claim that cars with manual tra
 
 ## Model Selection
 
-### Linear, Binomial, or Poisson?
+### Linear, Binary, or Poisson?
+
+Binary General Linear Models (GLM)s are meant to model outcomes that can take only two values. Poisson GLMs are meant to model outcomes that take the form of a count over a timespan (ex. number of visitors to hospital each hour). Since our outcome, miles per gallon for a car, is neither, we should use a standard multivariable linear regression. Our data have 10 possible factors to include as variables, and so we must decide which of these to include in our model.
 
 ### Which other factors to include
+
+```{r}
+fit <- lm(mpg ~ am, mtcars)
+summary(fit)
+```
+
+```{r}
+pairs(mtcars, upper.panel = function(x,y){points(x,y) + abline(lm(y~x), col='red')}, lower.panel = NULL)
+```
+
+The pairs plot can give us an idea of what variables may be important and what other variables may be correlated (and confound our fit).
+
+```{r}
+fit_all <- lm(mpg ~ ., mtcars)
+summary(fit_all)
+```
+
+The t-values in this summary (including all variables in our model) say that we cannot reject the hypothesis that the correlation is 0.
 
 #### Include some residual plots
 
