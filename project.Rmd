@@ -43,7 +43,17 @@ summary(fit)
 ```
 
 ```{r}
-pairs(mtcars, upper.panel = function(x,y){points(x,y) + abline(lm(y~x), col='red')}, lower.panel = NULL)
+panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...)
+{
+   usr <- par("usr"); on.exit(par(usr))
+   par(usr = c(0, 1, 0, 1))
+   r <- abs(cor(x, y))
+   txt <- format(c(r, 0.123456789), digits = digits)[1]
+   txt <- paste0(prefix, txt)
+   if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
+   text(0.5, 0.5, txt)
+}
+pairs(mtcars, upper.panel = function(x,y){points(x,y) + abline(lm(y~x), col='red')}, lower.panel = panel.cor)
 ```
 
 The pairs plot can give us an idea of what variables may be important and what other variables may be correlated (and confound our fit).
@@ -54,6 +64,18 @@ summary(fit_all)
 ```
 
 The t-values in this summary (including all variables in our model) say that we cannot reject the hypothesis that the correlation is 0.
+
+```{r}
+fit <- lm(mpg ~ wt * factor(am), mtcars)
+g <- ggplot(mtcars, aes(x=wt, y=mpg, color=factor(am)))
+g <- g + geom_point(size=6, color='black') + geom_point(size=4)
+g1 <- g
+g1 <- g1 + geom_abline(intercept = coef(fit)[1], slope=coef(fit)[2], size=2)
+g1 <- g1 + geom_abline(intercept = coef(fit)[1] + coef(fit)[3], slope = coef(fit)[2] + coef(fit)[4], size=2)
+g1
+```
+
+This model and then plot show that heavier cars have lower mpg and that whether manual or automatic is better depends on the weight of the car, but there isn't much overlap in weight between automatic and manual cars, so it's hard to say if this is really true.
 
 #### Include some residual plots
 
