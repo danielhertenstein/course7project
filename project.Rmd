@@ -40,6 +40,8 @@ Binary General Linear Models (GLM)s are meant to model outcomes that can take on
 ```{r}
 fit <- lm(mpg ~ am, mtcars)
 summary(fit)
+par(mfrow = c(2, 2))
+plot(fit)
 ```
 
 ```{r}
@@ -61,6 +63,8 @@ The pairs plot can give us an idea of what variables may be important and what o
 ```{r}
 fit_all <- lm(mpg ~ ., mtcars)
 summary(fit_all)
+par(mfrow = c(2,2))
+plot(fit_all)
 ```
 
 The t-values in this summary (including all variables in our model) say that we cannot reject the hypothesis that the correlation is 0.
@@ -77,7 +81,13 @@ g1
 
 This model and then plot show that heavier cars have lower mpg and that whether manual or automatic is better depends on the weight of the car, but there isn't much overlap in weight between automatic and manual cars, so it's hard to say if this is really true.
 
+fit_w_weight <- lm(mpg ~ am + wt, mtcars)
+fit3 <- lm(mpg ~ am + wt + hp, mtcars)
+anova(fit, fit_w_weight, fit3)
+
 #### Include some residual plots
+
+Do the plot(fit) here of the final model
 
 ## Automatic vs. Manual
 
