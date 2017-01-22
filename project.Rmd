@@ -3,8 +3,8 @@ title: "Analysis for Motor Trend"
 author: "Daniel Hertenstein"
 date: "January 13, 2017"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -12,6 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Executive Summary
+
+Using multivariable linear regression, we find that we cannot claim there is a significant difference in mpg between manual and automatic cars. Our modeling shows that the horsepower of a car and its weight are the primary determinants of the mpg of a car. However, even this claim is rather shaky as our data set for this analysis does not include enough manual cars that are high horsepower and high weights or automatic cars with low horsepower and low weights. Data from more cars should be collected to affirm these findings.
 
 ## Exploratory Analysis
 
@@ -31,68 +33,39 @@ Based on this plot, we can make a naive and weak claim that cars with manual tra
 
 ## Model Selection
 
-### Linear, Binary, or Poisson?
-
-Binary General Linear Models (GLM)s are meant to model outcomes that can take only two values. Poisson GLMs are meant to model outcomes that take the form of a count over a timespan (ex. number of visitors to hospital each hour). Since our outcome, miles per gallon for a car, is neither, we should use a standard multivariable linear regression. Our data have 10 possible factors to include as variables, and so we must decide which of these to include in our model.
-
-### Which other factors to include
-
 ```{r}
-fit <- lm(mpg ~ am, mtcars)
-summary(fit)
+naive_fit <- lm(mpg ~ am, mtcars)
+summary(naive_fit)
 par(mfrow = c(2, 2))
-plot(fit)
+plot(naive_fit)
 ```
+
+If we only include the transmission type in our model, we see that the p-value for the transmission type coefficient is well below 0.05. This infers a significant difference between the mpg's of manual and automatic cars. Specifically, that manual cars have, on average, a better mpg by 7.245. However, our model (as indicated by the R-squared) only explains 36% of the variance. Additionally, there is a clear pattern in the residuals vs fitted values plot in which most of the residuals aren't anywhere close to 0, telling us that there are factors missing from our model.
+
+Using nested model comparisons, we add regressors in order of their addition to the explanation of the variance until the new model is no longer significantly different according to anova testing. Doing so, we find that our best model is one that includes horsepower and weight in addition to our starting regressor of transmission type.
 
 ```{r}
-panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...)
-{
-   usr <- par("usr"); on.exit(par(usr))
-   par(usr = c(0, 1, 0, 1))
-   r <- abs(cor(x, y))
-   txt <- format(c(r, 0.123456789), digits = digits)[1]
-   txt <- paste0(prefix, txt)
-   if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
-   text(0.5, 0.5, txt)
-}
-pairs(mtcars, upper.panel = function(x,y){points(x,y) + abline(lm(y~x), col='red')}, lower.panel = panel.cor)
+fit2 <- lm(mpg ~ factor(am) + hp, mtcars)
+summary(fit2)
+anova(naive_fit, fit2)
+final_model <- lm(mpg ~ factor(am) + hp + wt, mtcars)
+summary(final_model)
+anova(fit2, final_model)
 ```
 
-The pairs plot can give us an idea of what variables may be important and what other variables may be correlated (and confound our fit).
+Our final model explains 84% of the variance. We also see that the residuals of our model are fairly normal although influenced by a three outlier cars: Chrysler Imperial, Toyota Corolla, and Fiat 128.
 
 ```{r}
-fit_all <- lm(mpg ~ ., mtcars)
-summary(fit_all)
-par(mfrow = c(2,2))
-plot(fit_all)
+par(mfrow = c(2, 2))
+plot(final_model)
 ```
 
-The t-values in this summary (including all variables in our model) say that we cannot reject the hypothesis that the correlation is 0.
+Unlike our naive model, the final model shows that the difference between manual and automatic cars, now 2 mpg, is not significant (our inference test gives us a p-value of 0.14). Our model states that mpg is determined far more by the horsepower and weight of the car rather than its transmission type.
 
+## Difficulties with This Approach
+
+The main difficulty in making a generalization about which, between manual and automatic, is better for mpg, is that our samples in for each transmission type are not evenly distributed across the two most important regressors in our final model, horsepower and weight. In our data set, manual cars are, for the most part, lighter and have less horsepower, leading them to have higher mpg. Data from more cars should be collected to strengthen this analysis.
 ```{r}
-fit <- lm(mpg ~ wt * factor(am), mtcars)
-g <- ggplot(mtcars, aes(x=wt, y=mpg, color=factor(am)))
-g <- g + geom_point(size=6, color='black') + geom_point(size=4)
-g1 <- g
-g1 <- g1 + geom_abline(intercept = coef(fit)[1], slope=coef(fit)[2], size=2)
-g1 <- g1 + geom_abline(intercept = coef(fit)[1] + coef(fit)[3], slope = coef(fit)[2] + coef(fit)[4], size=2)
-g1
+ggplot(mtcars, aes(x=wt, y=mpg, color = factor(am))) + geom_point() + labs(title="Most manual cars are lighter")
+ggplot(mtcars, aes(x=hp, y=mpg, color = factor(am))) + geom_point() + labs(title="Most manual cars have less horsepower")
 ```
-
-This model and then plot show that heavier cars have lower mpg and that whether manual or automatic is better depends on the weight of the car, but there isn't much overlap in weight between automatic and manual cars, so it's hard to say if this is really true.
-
-fit_w_weight <- lm(mpg ~ am + wt, mtcars)
-fit3 <- lm(mpg ~ am + wt + hp, mtcars)
-anova(fit, fit_w_weight, fit3)
-
-#### Include some residual plots
-
-Do the plot(fit) here of the final model
-
-## Automatic vs. Manual
-
-### Hypothesis Testing
-
-### Quantifying the Uncertainty
-
-## Conclusions and Assumptions?
