@@ -20,51 +20,63 @@ Using multivariable linear regression, we find that we cannot claim there is a s
 ```{r}
 head(mtcars)
 dim(mtcars)
+mtcars[,'cyl'] <- as.factor(mtcars[,'cyl'])
+mtcars[,'am'] <- as.factor(mtcars[,'am'])
+mtcars[,'vs'] <- as.factor(mtcars[,'vs'])
+mtcars[,'gear'] <- as.factor(mtcars[,'gear'])
+mtcars[,'carb'] <- as.factor(mtcars[,'carb'])
 ```
 
 The mtcars data set contains observations of 11 variables for 32 cars extracted from the 1974 Motor Trend US Magazine. The variables are, in order as seen by the first 5 rows: miles per gallon (mpg), number of cylinders, engine displacement, gross horsepower, rear axle ratio, weight (in tons (1000 lbs)), 1/4 mile time, V/S, transmission type, number of forward gears, and number of carburetors. Our analysis explores mpg for cars with manual vs. automatic transmissions. To get an idea of the distribution of mpg for each category, we start with a simple violin plot.
 
-```{r}
-library(ggplot2)
-ggplot(mtcars, aes(factor(am), mpg)) + geom_violin() + labs(x="Automatic (0) vs. Manual (1)", title="Naively, Manual Looks Better")
-```
-
-Based on this plot, we can make a naive and weak claim that cars with manual transmissions have higher mpgs than those with automatic transmission. However, there may be other reasons for the difference in this plot due to differences in the other variables in the data set such as weight or number of cylinders. To address this, we will fit a linear model relating mpg to the most important (to the best of our abilities) factors.
+Based on Figure 1 (see Appendix), we can make a naive and weak claim that cars with manual transmissions have higher mpgs than those with automatic transmission. However, there may be other reasons for the difference in this plot due to differences in the other variables in the data set such as weight or number of cylinders. To address this, we will fit a linear model relating mpg to the most important (to the best of our abilities) factors.
 
 ## Model Selection
 
 ```{r}
 naive_fit <- lm(mpg ~ am, mtcars)
-summary(naive_fit)
-par(mfrow = c(2, 2))
-plot(naive_fit)
+summary(naive_fit)$r.squared
+coef(naive_fit)[2]
 ```
 
-If we only include the transmission type in our model, we see that the p-value for the transmission type coefficient is well below 0.05. This infers a significant difference between the mpg's of manual and automatic cars. Specifically, that manual cars have, on average, a better mpg by 7.245. However, our model (as indicated by the R-squared) only explains 36% of the variance. Additionally, there is a clear pattern in the residuals vs fitted values plot in which most of the residuals aren't anywhere close to 0, telling us that there are factors missing from our model.
+If we only include the transmission type in our model, we see that the p-value for the transmission type coefficient is well below 0.05. This infers a significant difference between the mpg's of manual and automatic cars. Specifically, that manual cars have, on average, a better mpg by 7.245. However, our model (as indicated by the R-squared) only explains 36% of the variance. Looking at Figure 2 (see Appendix) there is a clear pattern in the residuals vs fitted values plot in which most of the residuals aren't anywhere close to 0, telling us that there are factors missing from our model.
 
 Using nested model comparisons, we add regressors in order of their addition to the explanation of the variance until the new model is no longer significantly different according to anova testing. Doing so, we find that our best model is one that includes horsepower and weight in addition to our starting regressor of transmission type.
 
 ```{r}
 fit2 <- lm(mpg ~ factor(am) + hp, mtcars)
-summary(fit2)
+summary(fit2)$r.squared
 anova(naive_fit, fit2)
 final_model <- lm(mpg ~ factor(am) + hp + wt, mtcars)
 summary(final_model)
 anova(fit2, final_model)
 ```
 
-Our final model explains 84% of the variance. We also see that the residuals of our model are fairly normal although influenced by a three outlier cars: Chrysler Imperial, Toyota Corolla, and Fiat 128.
+Our final model explains 84% of the variance. Looking at Figure 3, we also see that the residuals of our model are fairly normal although influenced by a three outlier cars: Chrysler Imperial, Toyota Corolla, and Fiat 128.
+
+Unlike our naive model, the final model shows that the difference between manual and automatic cars, now 2 mpg, is not significant (our inference test gives us a p-value of 0.14). Our model states that mpg is determined far more by the horsepower and weight of the car rather than its transmission type.
+
+## Difficulties with This Approach
+
+The main difficulty in making a generalization about which, between manual and automatic, is better for mpg, is that our samples in for each transmission type are not evenly distributed across the two most important regressors in our final model, horsepower and weight. Looking at Figure 4, we see that in our data set, manual cars are, for the most part, lighter and have less horsepower, leading them to have higher mpg. Data from more cars should be collected to strengthen this analysis.
+
+## Appendix of Figures
+
+```{r}
+library(ggplot2)
+ggplot(mtcars, aes(factor(am), mpg)) + geom_violin() + labs(x="Automatic (0) vs. Manual (1)", title="Naively, Manual Looks Better")
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(naive_fit)
+```
 
 ```{r}
 par(mfrow = c(2, 2))
 plot(final_model)
 ```
 
-Unlike our naive model, the final model shows that the difference between manual and automatic cars, now 2 mpg, is not significant (our inference test gives us a p-value of 0.14). Our model states that mpg is determined far more by the horsepower and weight of the car rather than its transmission type.
-
-## Difficulties with This Approach
-
-The main difficulty in making a generalization about which, between manual and automatic, is better for mpg, is that our samples in for each transmission type are not evenly distributed across the two most important regressors in our final model, horsepower and weight. In our data set, manual cars are, for the most part, lighter and have less horsepower, leading them to have higher mpg. Data from more cars should be collected to strengthen this analysis.
 ```{r}
 ggplot(mtcars, aes(x=wt, y=mpg, color = factor(am))) + geom_point() + labs(title="Most manual cars are lighter")
 ggplot(mtcars, aes(x=hp, y=mpg, color = factor(am))) + geom_point() + labs(title="Most manual cars have less horsepower")
