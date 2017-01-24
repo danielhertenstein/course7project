@@ -46,10 +46,10 @@ Using nested model comparisons, we add regressors in order of their addition to 
 ```{r}
 fit2 <- lm(mpg ~ factor(am) + hp, mtcars)
 summary(fit2)$r.squared
-anova(naive_fit, fit2)
+anova(naive_fit, fit2)$`Pr(>F)`
 final_model <- lm(mpg ~ factor(am) + hp + wt, mtcars)
-summary(final_model)
-anova(fit2, final_model)
+summary(final_model)$r.squared
+anova(fit2, final_model)$`Pr(>F)`
 ```
 
 Our final model explains 84% of the variance. Looking at Figure 3, we also see that the residuals of our model are fairly normal although influenced by a three outlier cars: Chrysler Imperial, Toyota Corolla, and Fiat 128.
@@ -58,26 +58,28 @@ Unlike our naive model, the final model shows that the difference between manual
 
 ## Difficulties with This Approach
 
-The main difficulty in making a generalization about which, between manual and automatic, is better for mpg, is that our samples in for each transmission type are not evenly distributed across the two most important regressors in our final model, horsepower and weight. Looking at Figure 4, we see that in our data set, manual cars are, for the most part, lighter and have less horsepower, leading them to have higher mpg. Data from more cars should be collected to strengthen this analysis.
+The main difficulty in making a generalization about which, between manual and automatic, is better for mpg, is that our samples in for each transmission type are not evenly distributed across the two most important regressors in our final model, horsepower and weight. Looking at Figures 4 and 5, we see that in our data set, manual cars are, for the most part, lighter and have less horsepower, leading them to have higher mpg. Data from more cars should be collected to strengthen this analysis.
 
 ## Appendix of Figures
 
 ```{r}
 library(ggplot2)
-ggplot(mtcars, aes(factor(am), mpg)) + geom_violin() + labs(x="Automatic (0) vs. Manual (1)", title="Naively, Manual Looks Better")
+ggplot(mtcars, aes(factor(am), mpg)) + geom_violin() + labs(x="Automatic (0) vs. Manual (1)", title="Figure 1: Naively, Manual Looks Better")
 ```
 
 ```{r}
 par(mfrow = c(2, 2))
 plot(naive_fit)
+mtext("Figure 2: Residuals for the Naive Fit Indicate Need for Better Model", side = 3, line = -2, outer = TRUE)
 ```
 
 ```{r}
 par(mfrow = c(2, 2))
 plot(final_model)
+mtext("Figure 3: Residuals for the Final Model Are Acceptable", side = 3, line = -2, outer = TRUE)
 ```
 
 ```{r}
-ggplot(mtcars, aes(x=wt, y=mpg, color = factor(am))) + geom_point() + labs(title="Most manual cars are lighter")
-ggplot(mtcars, aes(x=hp, y=mpg, color = factor(am))) + geom_point() + labs(title="Most manual cars have less horsepower")
+ggplot(mtcars, aes(x=wt, y=mpg, color = factor(am))) + geom_point() + labs(title="Figure 4: Most manual cars are lighter")
+ggplot(mtcars, aes(x=hp, y=mpg, color = factor(am))) + geom_point() + labs(title="Figure 5: Most manual cars have less horsepower")
 ```
